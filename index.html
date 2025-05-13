@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Fincas - FEDEGÁN</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+  <h1>Registro de Finca Ganadera</h1>
+  <form id="fincaForm">
+    <input type="text" id="nombreFinca" placeholder="Nombre de la finca" required>
+    <input type="text" id="ubicacion" placeholder="Ubicación" required>
+    <input type="number" id="bovinos" placeholder="Cantidad de bovinos">
+    <input type="number" id="porcinos" placeholder="Cantidad de porcinos">
+    <button type="submit">Guardar Registro</button>
+  </form>
+
+  <h2>Registros en tiempo real</h2>
+  <ul id="listaFincas"></ul>
+
+  <script src="firebase/firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
