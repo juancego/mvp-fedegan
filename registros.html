@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial de Registros</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+</head>
+<body>
+  <div class="list-container">
+    <h1>Mis Registros</h1>
+    <ul id="listaFincas"></ul>
+    <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
+  </div>
+
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const lista = document.getElementById("listaFincas");
+
+      firebase.database().ref("fincas").orderByChild("vacunador").equalTo(user.uid)
+        .on("value", (snapshot) => {
+          lista.innerHTML = "";
+          if (!snapshot.exists()) {
+            lista.innerHTML = "<li>No hay registros encontrados.</li>";
+            return;
+          }
+
+          snapshot.forEach((child) => {
+            const finca = child.val();
+            const item = document.createElement("li");
+            item.innerHTML = `
+              <strong>${finca.nombre}</strong><br>
+              Ubicación: ${finca.ubicacion}<br>
+              Bovinos: ${finca.animales.bovinos}, Porcinos: ${finca.animales.porcinos}<br>
+              Fecha: ${new Date(finca.fecha).toLocaleDateString()}
+            `;
+            lista.appendChild(item);
+          });
+        });
+    });
+  </script>
+</body>
+</html>

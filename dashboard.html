@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - FEDEGÁN</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <header>
+      <h1>Panel del Vacunador</h1>
+      <button id="logoutBtn">Cerrar sesión</button>
+    </header>
+
+    <main>
+      <div class="card" onclick="location.href='registro-finca.html'">
+        <h2>Captura información de una unidad ganadera.</h2>
+        <button id="registrofincabtn">Registrar una nueva finca</button>
+      </div>
+
+      <div class="card" onclick="location.href='registros.html'">
+        <h2>Consulta los datos ingresados anteriormente.</h2>
+        <button id="historialbtn">Ver historial de registros</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</body>
+</html>

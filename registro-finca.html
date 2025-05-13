@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Finca</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Registrar Nueva Finca</h1>
+    <form id="fincaForm">
+      <input type="text" id="nombreFinca" placeholder="Nombre de la finca" required>
+      <input type="text" id="ubicacion" placeholder="Ubicación (municipio, región)" required>
+      <input type="number" id="bovinos" placeholder="Cantidad de bovinos" min="0">
+      <input type="number" id="porcinos" placeholder="Cantidad de porcinos" min="0">
+      <button type="submit">Guardar Registro</button>
+    </form>
+    <p id="mensaje" class="success-msg"></p>
+    <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
+  </div>
+
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("fincaForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombreFinca").value;
+        const ubicacion = document.getElementById("ubicacion").value;
+        const bovinos = parseInt(document.getElementById("bovinos").value || 0);
+        const porcinos = parseInt(document.getElementById("porcinos").value || 0);
+
+        const finca = {
+          nombre: nombre,
+          ubicacion: ubicacion,
+          animales: {
+            bovinos: bovinos,
+            porcinos: porcinos
+          },
+          fecha: new Date().toISOString(),
+          vacunador: user.uid
+        };
+
+        firebase.database().ref("fincas").push(finca).then(() => {
+          document.getElementById("mensaje").textContent = "Registro guardado correctamente.";
+          document.getElementById("fincaForm").reset();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

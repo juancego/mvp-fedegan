@@ -1,33 +1,165 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 2rem;
-    background-color: #f4f4f4;
+    background-color: #f0f4f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
   }
   
-  h1, h2 {
-    color: #0a3d2e;
+  .login-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 300px;
+    text-align: center;
   }
   
-  form {
-    margin-bottom: 2rem;
-    background: #fff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0px 0px 6px rgba(0,0,0,0.1);
-  }
-  
-  input, button {
-    display: block;
-    margin: 0.5rem 0;
-    padding: 0.6rem;
+  input {
     width: 100%;
-    font-size: 1rem;
+    padding: 0.7rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
   }
   
   button {
     background-color: #0a3d2e;
-    color: #fff;
+    color: white;
     border: none;
+    padding: 0.7rem;
+    border-radius: 5px;
+    width: 100%;
     cursor: pointer;
   }
+  
+  button:hover {
+    background-color: #085e3b;
+  }
+  
+  .error-msg {
+    color: red;
+    font-size: 0.9rem;
+  
+    .dashboard-container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background-color: white;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  background-color: #f4f9f5;
+}
+
+.card h2 {
+  color: #0a3d2e;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: auto;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .card {
+    background-color: white;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-4px);
+    background-color: #f4f9f5;
+  }
+  
+  .card h2 {
+    color: #0a3d2e;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-container {
+    max-width: 400px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .success-msg {
+    color: green;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+  
+  .list-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  #listaFincas {
+    list-style: none;
+    padding: 0;
+  }
+  
+  #listaFincas li {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  #listaFincas li:last-child {
+    border-bottom: none;
+  }
+  
+  .btn-secundario {
+    margin-top: 1rem;
+    background-color: #ddd;
+    color: #333;
+    border: none;
+    padding: 0.7rem;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-secundario:hover {
+    background-color: #ccc;
+  }
+  
+  }  
   
