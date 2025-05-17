@@ -11,7 +11,7 @@
 </head>
 <body>
   <div class="form-container">
-    <h1>Registrar Nueva Finca</h1>
+    <h1>Registrar o Editar Finca</h1>
     <form id="fincaForm">
       <input type="text" id="nombreFinca" placeholder="Nombre de la finca" required>
       <input type="text" id="ubicacion" placeholder="Ubicación (municipio, región)" required>
@@ -21,13 +21,40 @@
     </form>
     <p id="mensaje" class="success-msg"></p>
     <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
+
+    <!-- Botón para eliminar finca, solo aparece si estamos editando -->
+    <button id="deleteBtn" style="display:none;">Eliminar Finca</button>
   </div>
 
   <script>
+    let fincaId = null;
+
     firebase.auth().onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
+      }
+
+      // Si se está editando una finca
+      const urlParams = new URLSearchParams(window.location.search);
+      fincaId = urlParams.get("fincaId");
+
+      if (fincaId) {
+        // Obtener los datos de la finca para editarla
+        firebase.database().ref("fincas").child(fincaId).once("value", (snapshot) => {
+          const finca = snapshot.val();
+          if (finca && finca.vacunador === user.uid) {
+            document.getElementById("nombreFinca").value = finca.nombre;
+            document.getElementById("ubicacion").value = finca.ubicacion;
+            document.getElementById("bovinos").value = finca.animales.bovinos;
+            document.getElementById("porcinos").value = finca.animales.porcinos;
+
+            // Mostrar el botón de eliminar
+            document.getElementById("deleteBtn").style.display = "inline-block";
+          } else {
+            alert("No tienes permiso para editar esta finca.");
+          }
+        });
       }
 
       document.getElementById("fincaForm").addEventListener("submit", function(e) {
@@ -49,10 +76,31 @@
           vacunador: user.uid
         };
 
-        firebase.database().ref("fincas").push(finca).then(() => {
-          document.getElementById("mensaje").textContent = "Registro guardado correctamente.";
-          document.getElementById("fincaForm").reset();
-        });
+        if (fincaId) {
+          // Actualizar finca existente
+          firebase.database().ref("fincas").child(fincaId).update(finca).then(() => {
+            document.getElementById("mensaje").textContent = "Registro actualizado correctamente.";
+            document.getElementById("fincaForm").reset();
+            fincaId = null;
+            document.getElementById("deleteBtn").style.display = "none"; // Ocultar el botón de eliminar
+          });
+        } else {
+          // Crear nueva finca
+          firebase.database().ref("fincas").push(finca).then(() => {
+            document.getElementById("mensaje").textContent = "Registro guardado correctamente.";
+            document.getElementById("fincaForm").reset();
+          });
+        }
+      });
+
+      // Función para eliminar finca
+      document.getElementById("deleteBtn").addEventListener("click", () => {
+        if (confirm("¿Estás seguro de que deseas eliminar esta finca?")) {
+          firebase.database().ref("fincas").child(fincaId).remove().then(() => {
+            alert("Finca eliminada exitosamente.");
+            window.location.href = "registros.html"; // Volver al historial de registros
+          });
+        }
       });
     });
   </script>

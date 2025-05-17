@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Vacunadores</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+</head>
+<body>
+  <div class="vacunadores-container">
+    <h1>Gestión de Vacunadores</h1>
+
+    <div id="vacunadoresList">
+      <ul id="vacunadoresLista"></ul>
+    </div>
+
+    <h3>Agregar Vacunador</h3>
+    <form id="vacunadorForm">
+      <input type="text" id="nombreVacunador" placeholder="Nombre del vacunador" required>
+      <input type="text" id="cedulaVacunador" placeholder="Cédula del vacunador" required>
+      <button type="submit">Agregar Vacunador</button>
+      <p></p>
+    </form>
+
+    <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
+  </div>
+
+  <script>
+    let vacunadorId = null;
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const listaVacunadores = document.getElementById("vacunadoresLista");
+
+      // Leer la lista de vacunadores
+      firebase.database().ref("vacunadores").orderByChild("vacunador").equalTo(user.uid)
+        .on("value", (snapshot) => {
+          listaVacunadores.innerHTML = "";
+          if (!snapshot.exists()) {
+            listaVacunadores.innerHTML = "<li>No hay vacunadores registrados.</li>";
+            return;
+          }
+
+          snapshot.forEach((child) => {
+            const vacunador = child.val();
+            const idVacunador = child.key;
+            const item = document.createElement("li");
+            item.innerHTML = `
+              <strong>${vacunador.nombre}</strong><br>
+              Cédula: ${vacunador.cedula}<br>
+              <button onclick="editarVacunador('${idVacunador}', '${vacunador.nombre}', '${vacunador.cedula}')">Editar</button>
+              <button onclick="eliminarVacunador('${idVacunador}')">Eliminar</button>
+            `;
+            listaVacunadores.appendChild(item);
+          });
+        });
+
+      // Agregar nuevo vacunador
+      document.getElementById("vacunadorForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombreVacunador").value;
+        const cedula = document.getElementById("cedulaVacunador").value;
+
+        const vacunador = {
+          nombre: nombre,
+          cedula: cedula,
+          vacunador: user.uid
+        };
+
+        if (vacunadorId) {
+          // Actualizar vacunador existente
+          firebase.database().ref("vacunadores").child(vacunadorId).update(vacunador).then(() => {
+            alert("Vacunador actualizado correctamente.");
+            document.getElementById("vacunadorForm").reset();
+            vacunadorId = null;
+          });
+        } else {
+          // Crear nuevo vacunador
+          firebase.database().ref("vacunadores").push(vacunador).then(() => {
+            alert("Vacunador agregado correctamente.");
+            document.getElementById("vacunadorForm").reset();
+          });
+        }
+      });
+    });
+
+    // Función para editar vacunador
+    function editarVacunador(id, nombre, cedula) {
+      document.getElementById("nombreVacunador").value = nombre;
+      document.getElementById("cedulaVacunador").value = cedula;
+
+      // Cambiar la acción del formulario para actualizar el vacunador
+      vacunadorId = id;
+    }
+
+    // Función para eliminar vacunador
+    function eliminarVacunador(id) {
+      if (confirm("¿Estás seguro de que deseas eliminar este vacunador?")) {
+        firebase.database().ref("vacunadores").child(id).remove().then(() => {
+          alert("Vacunador eliminado exitosamente.");
+        });
+      }
+    }
+  </script>
+</body>
+</html>
+ 

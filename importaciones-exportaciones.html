@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Importaciones y Exportaciones</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+</head>
+<body>
+  <div class="importaciones-container">
+    <h1>Gestión de Importaciones y Exportaciones</h1>
+
+    <div id="importacionesExportacionesList">
+      <ul id="importacionesExportacionesLista"></ul>
+    </div>
+
+    <h3>Registrar Importación/Exportación</h3>
+    <form id="importExportForm">
+      <input type="text" id="producto" placeholder="Producto" required>
+      <input type="text" id="paisOrigen" placeholder="País de origen" required>
+      <input type="text" id="paisDestino" placeholder="País de destino" required>
+      <input type="number" id="cantidad" placeholder="Cantidad" min="0" required>
+      <button type="submit">Registrar</button>
+      <p></p>
+    </form>
+
+    <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
+  </div>
+
+  <script>
+    let importExportId = null;
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const listaImportacionesExportaciones = document.getElementById("importacionesExportacionesLista");
+
+      // Leer la lista de importaciones y exportaciones
+      firebase.database().ref("importaciones_exportaciones").orderByChild("usuario").equalTo(user.uid)
+        .on("value", (snapshot) => {
+          listaImportacionesExportaciones.innerHTML = "";
+          if (!snapshot.exists()) {
+            listaImportacionesExportaciones.innerHTML = "<li>No hay registros encontrados.</li>";
+            return;
+          }
+
+          snapshot.forEach((child) => {
+            const registro = child.val();
+            const idRegistro = child.key;
+            const item = document.createElement("li");
+            item.innerHTML = `
+              <strong>${registro.producto}</strong><br>
+              Origen: ${registro.paisOrigen}<br>
+              Destino: ${registro.paisDestino}<br>
+              Cantidad: ${registro.cantidad}<br>
+              <button onclick="editarRegistro('${idRegistro}', '${registro.producto}', '${registro.paisOrigen}', '${registro.paisDestino}', ${registro.cantidad})">Editar</button>
+              <p></p>
+              <button onclick="eliminarRegistro('${idRegistro}')">Eliminar</button>
+            `;
+            listaImportacionesExportaciones.appendChild(item);
+          });
+        });
+
+      // Agregar nuevo registro
+      document.getElementById("importExportForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const producto = document.getElementById("producto").value;
+        const paisOrigen = document.getElementById("paisOrigen").value;
+        const paisDestino = document.getElementById("paisDestino").value;
+        const cantidad = parseInt(document.getElementById("cantidad").value);
+
+        const registro = {
+          producto: producto,
+          paisOrigen: paisOrigen,
+          paisDestino: paisDestino,
+          cantidad: cantidad,
+          usuario: user.uid
+        };
+
+        if (importExportId) {
+          // Actualizar registro existente
+          firebase.database().ref("importaciones_exportaciones").child(importExportId).update(registro).then(() => {
+            alert("Registro actualizado correctamente.");
+            document.getElementById("importExportForm").reset();
+            importExportId = null;
+          });
+        } else {
+          // Crear nuevo registro
+          firebase.database().ref("importaciones_exportaciones").push(registro).then(() => {
+            alert("Registro guardado correctamente.");
+            document.getElementById("importExportForm").reset();
+          });
+        }
+      });
+    });
+
+    // Función para editar registro
+    function editarRegistro(id, producto, paisOrigen, paisDestino, cantidad) {
+      document.getElementById("producto").value = producto;
+      document.getElementById("paisOrigen").value = paisOrigen;
+      document.getElementById("paisDestino").value = paisDestino;
+      document.getElementById("cantidad").value = cantidad;
+
+      importExportId = id;
+    }
+
+    // Función para eliminar registro
+    function eliminarRegistro(id) {
+      if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+        firebase.database().ref("importaciones_exportaciones").child(id).remove().then(() => {
+          alert("Registro eliminado exitosamente.");
+        });
+      }
+    }
+  </script>
+</body>
+</html>

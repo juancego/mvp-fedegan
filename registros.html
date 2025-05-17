@@ -13,6 +13,26 @@
   <div class="list-container">
     <h1>Mis Registros</h1>
     <ul id="listaFincas"></ul>
+    
+    <!-- Formulario para agregar nueva finca -->
+    <h3>Agregar Nueva Finca</h3>
+    <form id="agregarFincaForm">
+      <label for="nombre">Nombre de la finca:</label>
+      <input type="text" id="nombre" required><br>
+      
+      <label for="ubicacion">Ubicación:</label>
+      <input type="text" id="ubicacion" required><br>
+
+      <label for="bovinos">Número de Bovinos:</label>
+      <input type="number" id="bovinos" required><br>
+
+      <label for="porcinos">Número de Porcinos:</label>
+      <input type="number" id="porcinos" required><br>
+
+      <button type="submit">Registrar Finca</button>
+      <p></p>
+    </form>
+    
     <button onclick="window.location.href='dashboard.html'" class="btn-secundario">Volver al menú</button>
   </div>
 
@@ -24,7 +44,9 @@
       }
 
       const lista = document.getElementById("listaFincas");
+      const form = document.getElementById("agregarFincaForm");
 
+      // Leer registros de Firebase
       firebase.database().ref("fincas").orderByChild("vacunador").equalTo(user.uid)
         .on("value", (snapshot) => {
           lista.innerHTML = "";
@@ -35,17 +57,85 @@
 
           snapshot.forEach((child) => {
             const finca = child.val();
+            const fincaId = child.key;
             const item = document.createElement("li");
             item.innerHTML = `
               <strong>${finca.nombre}</strong><br>
               Ubicación: ${finca.ubicacion}<br>
               Bovinos: ${finca.animales.bovinos}, Porcinos: ${finca.animales.porcinos}<br>
-              Fecha: ${new Date(finca.fecha).toLocaleDateString()}
+              Fecha: ${new Date(finca.fecha).toLocaleDateString()}<br>
+              <button onclick="editarFinca('${fincaId}', '${finca.nombre}', '${finca.ubicacion}', ${finca.animales.bovinos}, ${finca.animales.porcinos})">Editar</button>
+              <p></p>
+              <button onclick="eliminarFinca('${fincaId}')">Eliminar</button>
             `;
             lista.appendChild(item);
           });
         });
+
+      // Agregar nueva finca
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const nombre = document.getElementById("nombre").value;
+        const ubicacion = document.getElementById("ubicacion").value;
+        const bovinos = parseInt(document.getElementById("bovinos").value);
+        const porcinos = parseInt(document.getElementById("porcinos").value);
+
+        firebase.database().ref("fincas").push({
+          nombre,
+          ubicacion,
+          animales: {
+            bovinos,
+            porcinos
+          },
+          fecha: Date.now(),
+          vacunador: user.uid
+        });
+
+        // Limpiar el formulario
+        form.reset();
+      });
     });
+
+    // Función para editar finca
+    function editarFinca(fincaId, nombre, ubicacion, bovinos, porcinos) {
+      document.getElementById("nombre").value = nombre;
+      document.getElementById("ubicacion").value = ubicacion;
+      document.getElementById("bovinos").value = bovinos;
+      document.getElementById("porcinos").value = porcinos;
+
+      // Cambiar la acción del formulario para actualizar la finca
+      const form = document.getElementById("agregarFincaForm");
+      form.onsubmit = (event) => {
+        event.preventDefault();
+
+        const nombre = document.getElementById("nombre").value;
+        const ubicacion = document.getElementById("ubicacion").value;
+        const bovinos = parseInt(document.getElementById("bovinos").value);
+        const porcinos = parseInt(document.getElementById("porcinos").value);
+
+        firebase.database().ref("fincas").child(fincaId).update({
+          nombre,
+          ubicacion,
+          animales: {
+            bovinos,
+            porcinos
+          },
+          fecha: Date.now()
+        });
+
+        // Limpiar el formulario y restaurar la acción original
+        form.reset();
+        form.onsubmit = null;
+      };
+    }
+
+    // Función para eliminar finca
+    function eliminarFinca(fincaId) {
+      if (confirm("¿Estás seguro de que deseas eliminar esta finca?")) {
+        firebase.database().ref("fincas").child(fincaId).remove();
+      }
+    }
   </script>
 </body>
 </html>
